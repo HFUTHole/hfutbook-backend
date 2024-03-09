@@ -3,6 +3,8 @@ import { PrismaService } from 'nestjs-prisma'
 import { CreateHoleDto } from '@/modules/post/dto/create.dto'
 import { IUser } from '@/app'
 import { createResponse } from '@/utils/create'
+import { GetPostDetailQuery } from '@/modules/post/dto/get'
+import { CreateCommentDto } from '@/modules/post/dto/comment'
 
 @Injectable()
 export class PostService {
@@ -25,8 +27,65 @@ export class PostService {
           },
         },
       },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+          },
+        },
+        category: {
+          select: {
+            name: true,
+          },
+        },
+      },
     })
 
     return createResponse('帖子发布成功', post)
+  }
+
+  async getList() {}
+
+  async getPostDetail(query: GetPostDetailQuery) {
+    const post = await this.prisma.post.findFirst({
+      where: {
+        id: query.id,
+        isDeleted: false,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+          },
+        },
+      },
+    })
+
+    return createResponse('获取帖子详情成功', post)
+  }
+
+  async comment(dto: CreateCommentDto, reqUser: IUser) {
+    await this.prisma.comment.create({
+      data: {
+        body: dto.body,
+        imgs: dto.imgs,
+        user: {
+          connect: {
+            id: reqUser.id,
+          },
+        },
+        post: {
+          connect: {
+            id: dto.id,
+          },
+        },
+      },
+    })
+
+    return createResponse('评论成功')
   }
 }
