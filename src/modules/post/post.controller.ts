@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Post } from '@nestjs/common'
+import { Body, Controller, Inject, Post } from '@nestjs/common'
 import { PostService } from '@/modules/post/post.service'
 import { CreateHoleDto } from '@/modules/post/dto/create.dto'
 import { User } from '@/common/decorator/user.decorator'
