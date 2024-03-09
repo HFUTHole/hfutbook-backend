@@ -1,0 +1,174 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  username     String
+  studentId    Int
+  password     String
+  hfutPassword String
+  avatar       String
+  gender       Gender
+  role         Role   @default(User)
+
+  // relations
+  post          Post[]
+  comment       Comment[]
+  Reply         Reply[]
+  userLikePosts UserLikePosts[]
+
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  voteItems VoteItemsOnUsers[]
+
+  @@unique([id, username, studentId])
+  @@index([id, username, studentId])
+}
+
+model Post {
+  id Int @id @default(autoincrement())
+
+  title     String?
+  body      String  @db.Text
+  isDeleted Boolean @default(false)
+  views     Int     @default(0)
+
+  // relations
+  comment Comment[]
+  imgs    String[]  @default([])
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  userLikePosts UserLikePosts[]
+  vote          Vote?
+
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+  @@index([title, body])
+}
+
+model Comment {
+  id String @id @default(uuid())
+
+  body String   @db.Text
+  imgs String[] @default([])
+
+  // relations
+  replies Reply[]
+
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+}
+
+model Reply {
+  id String @id @default(uuid())
+
+  body String @db.Text
+
+  commentId String
+  comment   Comment @relation(fields: [commentId], references: [id])
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  parentReplyId String?
+  parentReply   Reply?  @relation("ReplyAndParent", fields: [parentReplyId], references: [id])
+  replies       Reply[] @relation("ReplyAndParent")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id            String @id @default(uuid())
+  name          String
+  description   String
+  avatar        String
+  backgroundImg String
+  posts         Post[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+  @@index([id, name])
+}
+
+model Vote {
+  id String @id @default(uuid())
+
+  total Int @default(0)
+
+  postId Int  @unique
+  post   Post @relation(fields: [postId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, postId])
+}
+
+model VoteItem {
+  id String @id @default(uuid())
+
+  body  String
+  users VoteItemsOnUsers[]
+}
+
+// foreign table
+model VoteItemsOnUsers {
+  voteId   String
+  voteItem VoteItem @relation(fields: [voteId], references: [id])
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  @@unique([voteId, userId])
+}
+
+model UserLikePosts {
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  @@unique([postId, userId])
+}
+
+enum Role {
+  Admin
+  User
+  Banned
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
