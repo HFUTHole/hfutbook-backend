@@ -90,7 +90,8 @@ model Comment {
 model Reply {
   id String @id @default(uuid())
 
-  body String @db.Text
+  body String   @db.Text
+  imgs String[] @default([])
 
   commentId String
   comment   Comment @relation(fields: [commentId], references: [id])

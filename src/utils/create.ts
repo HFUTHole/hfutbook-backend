@@ -1,6 +1,6 @@
 import { registerDecorator, ValidationOptions } from 'class-validator'
 
-export const createResponse = <T extends object>(
+export const createResponse = <T extends any>(
   msg: string,
   data: T = {} as T,
   code = 200,

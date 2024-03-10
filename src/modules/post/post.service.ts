@@ -4,7 +4,8 @@ import { CreateHoleDto } from '@/modules/post/dto/create.dto'
 import { IUser } from '@/app'
 import { createResponse } from '@/utils/create'
 import { GetPostDetailQuery } from '@/modules/post/dto/get'
-import { CreateCommentDto } from '@/modules/post/dto/comment'
+import { CreateCommentDto, CreateReplyDto } from '@/modules/post/dto/comment'
+import { isString } from '@/utils/is'
 
 @Injectable()
 export class PostService {
@@ -87,5 +88,32 @@ export class PostService {
     })
 
     return createResponse('评论成功')
+  }
+
+  async reply(dto: CreateReplyDto, reqUser: IUser) {
+    await this.prisma.reply.create({
+      data: {
+        body: dto.body,
+        user: {
+          connect: {
+            id: reqUser.id,
+          },
+        },
+        comment: {
+          connect: {
+            id: dto.commentId,
+          },
+        },
+        ...(isString(dto.replyId) && {
+          parentReply: {
+            connect: {
+              id: dto.replyId,
+            },
+          },
+        }),
+      },
+    })
+
+    return createResponse('回复成功')
   }
 }

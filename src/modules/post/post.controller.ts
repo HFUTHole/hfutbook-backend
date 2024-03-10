@@ -4,7 +4,7 @@ import { CreateHoleDto } from '@/modules/post/dto/create.dto'
 import { User } from '@/common/decorator/user.decorator'
 import { IUser } from '@/app'
 import { GetPostDetailQuery } from '@/modules/post/dto/get'
-import { CreateCommentDto } from '@/modules/post/dto/comment'
+import { CreateCommentDto, CreateReplyDto } from '@/modules/post/dto/comment'
 
 @Controller('post')
 export class PostController {
@@ -24,5 +24,10 @@ export class PostController {
   @Post('/comment')
   comment(@Body() dto: CreateCommentDto, @User() user: IUser) {
     return this.postService.comment(dto, user)
+  }
+
+  @Post('/reply')
+  reply(@Body() dto: CreateReplyDto, @User() user: IUser) {
+    return this.postService.reply(dto, user)
   }
 }

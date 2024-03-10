@@ -25,26 +25,25 @@ export class IsPostExistConstraint implements ValidatorConstraintInterface {
   }
 }
 
-// @ValidatorConstraint({ async: true })
-// @Injectable()
-// export class IsCommentExistConstraint implements ValidatorConstraintInterface {
-//   @InjectRepository(Comment)
-//   private readonly commentRepo: Repository<Comment>
-//
-//   async validate(id: string) {
-//     const hole = await this.commentRepo.findOne({
-//       where: {
-//         id,
-//       },
-//     })
-//
-//     if (!hole) {
-//       throw new NotFoundException('评论不存在')
-//     }
-//
-//     return true
-//   }
-// }
+@ValidatorConstraint({ async: true })
+@Injectable()
+export class IsCommentExistConstraint implements ValidatorConstraintInterface {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async validate(id: string) {
+    const hole = await this.prisma.comment.findFirst({
+      where: {
+        id,
+      },
+    })
+
+    if (!hole) {
+      throw new NotFoundException('评论不存在')
+    }
+
+    return true
+  }
+}
 //
 // @ValidatorConstraint({ async: true })
 // @Injectable()
@@ -67,22 +66,21 @@ export class IsPostExistConstraint implements ValidatorConstraintInterface {
 //   }
 // }
 //
-// @ValidatorConstraint({ async: true })
-// @Injectable()
-// export class IsReplyExistConstraint {
-//   @InjectRepository(Reply)
-//   private readonly replyRepo: Repository<Reply>
-//
-//   async validate(id: string) {
-//     const reply = await this.replyRepo.findOne({ where: { id } })
-//
-//     if (!reply) {
-//       throw new NotFoundException('回复不存在')
-//     }
-//
-//     return true
-//   }
-// }
+@ValidatorConstraint({ async: true })
+@Injectable()
+export class IsReplyExistConstraint {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async validate(id: string) {
+    const reply = await this.prisma.reply.findFirst({ where: { id } })
+
+    if (!reply) {
+      throw new NotFoundException('回复不存在')
+    }
+
+    return true
+  }
+}
 //
 // @ValidatorConstraint({ async: true })
 // @Injectable()
@@ -137,9 +135,9 @@ export const IsPostExist = createClassValidator(IsPostExistConstraint)
 //
 //
 //
-// export const IsCommentExist = createClassValidator(IsCommentExistConstraint)
-//
-// export const IsReplyExist = createClassValidator(IsReplyExistConstraint)
+export const IsCommentExist = createClassValidator(IsCommentExistConstraint)
+
+export const IsReplyExist = createClassValidator(IsReplyExistConstraint)
 //
 // export const IsCorrectSubCategory = createClassValidator(
 //   IsCorrectSubCategoryExistConstraint,
