@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common'
-import { PrismaModule } from 'nestjs-prisma'
 import { PostController } from './post.controller'
 import { PostService } from './post.service'
 import {
@@ -7,15 +6,16 @@ import {
   IsPostExistConstraint,
   IsReplyExistConstraint,
 } from '@/modules/post/dto/utils'
+import { PostLikeService } from '@/modules/post/post-like.service'
 
 @Module({
-  imports: [PrismaModule.forRoot()],
   controllers: [PostController],
   providers: [
     PostService,
     IsPostExistConstraint,
     IsCommentExistConstraint,
     IsReplyExistConstraint,
+    PostLikeService,
   ],
 })
 export class PostModule {}

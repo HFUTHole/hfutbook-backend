@@ -8,11 +8,9 @@ import { LoggerInterceptor } from '@/common/interceptors/logger.interceptor'
 import { ThrottlerGuard } from '@nestjs/throttler'
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt.guard'
 import { RolesGuard } from '@/common/guard/roles.guard'
-import { PrismaModule } from 'nestjs-prisma'
 
 @Module({
   imports: [
-    PrismaModule.forRoot(),
     WinstonModule.forRootAsync({
       useFactory: () => {
         const myFormat = format.printf(({ level, message, timestamp }) => {

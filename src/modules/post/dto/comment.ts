@@ -1,7 +1,6 @@
 import {
   ArrayMaxSize,
   IsArray,
-  IsEnum,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -14,6 +13,7 @@ import {
   IsPostExist,
   IsReplyExist,
 } from '@/modules/post/dto/utils'
+import { PaginateQuery } from '@/common/dtos/paginate.dto'
 
 export class CreateCommentDto {
   @IsPostExist()
@@ -55,4 +55,20 @@ export class CreateReplyDto {
   @IsArray()
   @IsOptional()
   imgs?: string[] = []
+}
+
+export class GetPostCommentQuery extends PaginateQuery {
+  @IsPostExist()
+  @IsPositive()
+  @IsNumber()
+  id: number
+
+  @IsCommentExist()
+  @IsOptional()
+  commentId?: string
+}
+
+export class GetRepliesQuery extends PaginateQuery {
+  @IsCommentExist()
+  commentId: string
 }

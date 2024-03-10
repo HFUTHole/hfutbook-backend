@@ -25,9 +25,9 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findFirst({
+    const user = (await this.prisma.user.findFirst({
       where: { studentId: dto.studentId },
-    })
+    }))!
 
     const isVerified = await verifyPassword(user.password, dto.password)
 

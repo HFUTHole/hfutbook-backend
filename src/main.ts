@@ -10,7 +10,6 @@ async function initPostCategories() {
   const prisma = new PrismaClient()
 
   const categories = await prisma.category.findMany()
-  console.log(categories[0].id)
 
   if (categories.length > 0) {
     return

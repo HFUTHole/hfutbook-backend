@@ -14,7 +14,9 @@ import { PostModule } from './modules/post/post.module'
 
 @Module({
   imports: [
-    PrismaModule.forRoot(),
+    PrismaModule.forRoot({
+      isGlobal: true,
+    }),
     TypedConfigModule.forRoot({
       schema: AppConfig,
       load: fileLoader(),

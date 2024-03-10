@@ -1,14 +1,26 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, ConflictException } from '@nestjs/common'
+import { PrismaClient } from '@prisma/client'
 import { PrismaService } from 'nestjs-prisma'
 import { CreateHoleDto } from '@/modules/post/dto/create.dto'
 import { IUser } from '@/app'
 import { createResponse } from '@/utils/create'
 import { GetPostDetailQuery } from '@/modules/post/dto/get'
-import { CreateCommentDto, CreateReplyDto } from '@/modules/post/dto/comment'
+import {
+  CreateCommentDto,
+  CreateReplyDto,
+  GetPostCommentQuery,
+  GetRepliesQuery,
+} from '@/modules/post/dto/comment'
 import { isString } from '@/utils/is'
+import { prismaPagination } from '@/utils/prisma'
+import { GetHomePostListQuery, LikePostDto } from '@/modules/post/dto/post'
 
 @Injectable()
 export class PostService {
+  private get prismaPaginate() {
+    return prismaPagination(this.prisma)
+  }
+
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateHoleDto, reqUser: IUser) {
@@ -47,24 +59,74 @@ export class PostService {
     return createResponse('帖子发布成功', post)
   }
 
-  async getList() {}
-
-  async getPostDetail(query: GetPostDetailQuery) {
-    const post = await this.prisma.post.findFirst({
-      where: {
-        id: query.id,
-        isDeleted: false,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            avatar: true,
+  async getHomePostList(query: GetHomePostListQuery, reqUser: IUser) {
+    const [data, meta] = await this.prismaPaginate.post
+      .paginate({
+        include: {
+          userLikePosts: {
+            where: {
+              userId: reqUser.id,
+            },
+          },
+          user: {
+            select: {
+              username: true,
+              avatar: true,
+              id: true,
+            },
           },
         },
-      },
+      })
+      .withPages({
+        limit: query.limit,
+        page: query.page,
+        includePageCount: true,
+      })
+      .then(async ([data, meta]) => {
+        await Promise.all(
+          data.map(async (item) => {
+            type Item = typeof item & { isLiked: boolean }
+            ;(item as Item).isLiked = Boolean(item.userLikePosts.length)
+          }),
+        )
+
+        return [data, meta]
+      })
+
+    return createResponse('获取帖子列表成功', {
+      data,
+      meta,
     })
+  }
+
+  async getPostDetail(query: GetPostDetailQuery, reqUser: IUser) {
+    const post = await this.prisma.post
+      .findFirst({
+        where: {
+          id: query.id,
+          isDeleted: false,
+        },
+        include: {
+          userLikePosts: {
+            where: {
+              userId: reqUser.id,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              username: true,
+              avatar: true,
+            },
+          },
+        },
+      })
+      .then((data) => {
+        type Data = typeof data & { isLiked: boolean }
+        ;(data as Data).isLiked = Boolean(data!.userLikePosts.length)
+
+        return data
+      })
 
     return createResponse('获取帖子详情成功', post)
   }
@@ -88,6 +150,52 @@ export class PostService {
     })
 
     return createResponse('评论成功')
+  }
+
+  async getCommentList(query: GetPostCommentQuery, reqUser: IUser) {
+    const [data, meta] = await this.prismaPaginate.comment
+      .paginate({
+        where: {
+          postId: query.id,
+        },
+        include: {
+          userLikeComments: {
+            where: {
+              userId: reqUser.id,
+            },
+          },
+          replies: {
+            include: {
+              _count: true,
+            },
+            orderBy: {
+              replies: {
+                _count: 'desc',
+              },
+            },
+          },
+        },
+      })
+      .withPages({
+        limit: query.limit,
+        page: query.page,
+        includePageCount: true,
+      })
+      .then(async ([data, meta]) => {
+        await Promise.all(
+          data.map(async (item) => {
+            type Item = typeof item & { isLiked: boolean }
+            ;(item as Item).isLiked = Boolean(item.userLikeComments.length)
+          }),
+        )
+
+        return [data, meta]
+      })
+
+    return createResponse('获取评论列表成功！', {
+      data,
+      meta,
+    })
   }
 
   async reply(dto: CreateReplyDto, reqUser: IUser) {
@@ -115,5 +223,41 @@ export class PostService {
     })
 
     return createResponse('回复成功')
+  }
+
+  async getReplies(query: GetRepliesQuery, reqUser: IUser) {
+    const [data, meta] = await this.prismaPaginate.reply
+      .paginate({
+        where: {
+          commentId: query.commentId,
+        },
+        include: {
+          userLikeReplies: {
+            where: {
+              userId: reqUser.id,
+            },
+          },
+        },
+      })
+      .withPages({
+        limit: query.limit,
+        page: query.page,
+        includePageCount: true,
+      })
+      .then(async ([data, meta]) => {
+        await Promise.all(
+          data.map(async (item) => {
+            type Item = typeof item & { isLiked: boolean }
+            ;(item as Item).isLiked = Boolean(item.userLikeReplies.length)
+          }),
+        )
+
+        return [data, meta]
+      })
+
+    return createResponse('获取回复列表成功', {
+      data,
+      meta,
+    })
   }
 }

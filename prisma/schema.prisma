@@ -30,9 +30,11 @@ model User {
   Reply         Reply[]
   userLikePosts UserLikePosts[]
 
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-  voteItems VoteItemsOnUsers[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  voteItems        VoteItemsOnUsers[]
+  userLikeComments UserLikeComments[]
+  userLikeReplies  UserLikeReplies[]
 
   @@unique([id, username, studentId])
   @@index([id, username, studentId])
@@ -53,8 +55,10 @@ model Post {
   userId Int
   user   User @relation(fields: [userId], references: [id])
 
-  userLikePosts UserLikePosts[]
-  vote          Vote?
+  userLikePosts    UserLikePosts[]
+  userLikeComments UserLikeComments[]
+  userLikeReplies  UserLikeReplies[]
+  vote             Vote?
 
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
@@ -81,8 +85,9 @@ model Comment {
   user   User @relation(fields: [userId], references: [id])
   userId Int
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  userLikeComments UserLikeComments[]
 
   @@unique([id])
 }
@@ -103,8 +108,9 @@ model Reply {
   parentReply   Reply?  @relation("ReplyAndParent", fields: [parentReplyId], references: [id])
   replies       Reply[] @relation("ReplyAndParent")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  userLikeReplies UserLikeReplies[]
 }
 
 model Category {
@@ -154,6 +160,7 @@ model VoteItemsOnUsers {
   @@unique([voteId, userId])
 }
 
+// 用户点赞帖子
 model UserLikePosts {
   post   Post @relation(fields: [postId], references: [id])
   postId Int
@@ -161,6 +168,31 @@ model UserLikePosts {
   userId Int
 
   @@unique([postId, userId])
+}
+
+// 用户点赞评论
+model UserLikeComments {
+  comment   Comment @relation(fields: [commentId], references: [id])
+  commentId String
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  Post      Post?   @relation(fields: [postId], references: [id])
+  postId    Int?
+
+  @@unique([commentId, userId])
+}
+
+// 用户点赞的回复
+model UserLikeReplies {
+  reply   Reply  @relation(fields: [replyId], references: [id])
+  replyId String
+
+  user   User  @relation(fields: [userId], references: [id])
+  userId Int
+  Post   Post? @relation(fields: [postId], references: [id])
+  postId Int?
+
+  @@unique([replyId, userId])
 }
 
 enum Role {

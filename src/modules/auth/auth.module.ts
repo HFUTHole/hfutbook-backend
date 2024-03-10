@@ -7,10 +7,9 @@ import { JwtModule } from '@nestjs/jwt'
 import { JwtStrategy } from '@/modules/auth/guards/jwt.strategy'
 import { AppConfig } from '@/app.config'
 import { JwtModuleOptions } from '@nestjs/jwt/dist/interfaces/jwt-module-options.interface'
-import { PrismaModule } from 'nestjs-prisma'
+
 @Module({
   imports: [
-    PrismaModule.forRoot(),
     JwtModule.registerAsync({
       useFactory(config: AppConfig): JwtModuleOptions {
         return {
