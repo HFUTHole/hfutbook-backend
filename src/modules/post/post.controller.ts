@@ -39,6 +39,11 @@ export class PostController {
     return this.postService.create(dto, user)
   }
 
+  @Get('/list')
+  getHomePostList(@Query() query: GetHomePostListQuery, @User() user: IUser) {
+    return this.postService.getHomePostList(query, user)
+  }
+
   @Get('/detail')
   getPostDetail(@Query() query: GetPostDetailQuery, @User() user: IUser) {
     return this.postService.getPostDetail(query, user)
@@ -72,11 +77,6 @@ export class PostController {
   @Delete('/reply/like')
   deleteReplyLike(@Body() dto: LikeReplyDto, @User() user: IUser) {
     return this.postLikeService.deleteReplyLike(dto, user)
-  }
-
-  @Get('/list')
-  getHomePostList(@Query() query: GetHomePostListQuery, @User() user: IUser) {
-    return this.postService.getHomePostList(query, user)
   }
 
   @Post('/comment')

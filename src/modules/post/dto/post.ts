@@ -9,7 +9,6 @@ import {
 
 export class GetHomePostListQuery extends PaginateQuery {
   @IsEnum(HomePostListMode)
-  @IsNumber()
   mode = HomePostListMode.latest
 }
 

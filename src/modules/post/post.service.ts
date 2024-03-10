@@ -1,5 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common'
-import { PrismaClient } from '@prisma/client'
+import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'nestjs-prisma'
 import { CreateHoleDto } from '@/modules/post/dto/create.dto'
 import { IUser } from '@/app'
@@ -13,7 +12,7 @@ import {
 } from '@/modules/post/dto/comment'
 import { isString } from '@/utils/is'
 import { prismaPagination } from '@/utils/prisma'
-import { GetHomePostListQuery, LikePostDto } from '@/modules/post/dto/post'
+import { GetHomePostListQuery } from '@/modules/post/dto/post'
 
 @Injectable()
 export class PostService {

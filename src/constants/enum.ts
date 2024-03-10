@@ -1,4 +1,4 @@
 export enum HomePostListMode {
-  latest,
-  recommend,
+  latest = 'latest',
+  recommend = 'recommend',
 }
